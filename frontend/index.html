@@ -8,34 +8,30 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,500;8..60,600&display=swap"
       rel="stylesheet"
     />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_circle,add,arrow_back,arrow_drop_down,arrow_forward,attach_file,auto_awesome,calendar_today,call,camera,check,check_circle,close,communication,content_copy,contrast,dark_mode,delete,download,draw,edit,error,event,favorite,favorite_off,folder,help,home,info,light_mode,location_on,lock,lock_open,mail,menu,mobile_layout,more_horiz,more_vert,notifications,notifications_off,payment,pen_size_1,person,phone,photo,print,progress_activity,rectangle,refresh,search,send,settings,share,shopping_cart,star,star_half,star_off,upload,visibility,visibility_off,warning"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_circle,add,arrow_back,arrow_drop_down,arrow_forward,attach_file,auto_awesome,calendar_today,call,camera,check,check_circle,close,communication,content_copy,contrast,dark_mode,delete,download,draw,edit,error,event,favorite,favorite_border,folder,help,home,info,light_mode,location_on,lock,lock_open,mail,menu,mobile_layout,more_horiz,more_vert,notifications,notifications_off,payment,pen_size_1,person,phone,photo,print,progress_activity,rectangle,refresh,search,send,settings,share,shopping_cart,star,star_border,star_half,upload,visibility,visibility_off,warning,widgets"
     />
 
     <style>
       :root {
-        /* Claude-inspired warm palette */
-        --bg-primary: #FAF9F7;
-        --bg-secondary: #F5F3F0;
-        --surface: #FFFFFF;
-        --surface-elevated: #FFFFFF;
-        --text-primary: #1A1A1A;
-        --text-secondary: #666666;
-        --text-tertiary: #999999;
-        --accent: #E07A5F;
-        --accent-light: #F4D3CB;
-        --border: #E8E5E0;
-        --border-light: #F0EDE8;
-        
-        /* Preview gradient colors */
-        --gradient-1: #a855f7;
-        --gradient-2: #6366f1;
-        --gradient-3: #3b82f6;
-        --gradient-4: #14b8a6;
+        /* Claude-inspired warm palette - Light Mode */
+        --bg-0: #FAF9F5;
+        --bg-000: #FAF9F5;
+        --bg-100: #FFFFFF;
+        --bg-200: #F0EEE6;
+        --bg-300: #DDDDDD;
+        --text-100: #1F1E1D;
+        --text-200: #3D3D3A;
+        --text-300: #73726C;
+        --text-400: #888888;
+        --text-500: #999999;
+        --accent: #D97757;
+        --accent-hover: #C6613F;
+        --accent-light: rgba(217, 119, 87, 0.1);
         
         /* Spacing */
         --space-1: 4px;
@@ -53,16 +49,32 @@
         --radius-md: 10px;
         --radius-lg: 16px;
         --radius-xl: 24px;
+        --radius-2xl: 32px;
         
         /* Shadows */
-        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
-        --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+        --shadow-input: 0 0 15px rgba(0, 0, 0, 0.08);
+        --shadow-input-hover: 0 0 20px rgba(0, 0, 0, 0.12);
+        --shadow-input-focus: 0 0 25px rgba(0, 0, 0, 0.15);
         
-        /* Transitions */
-        --transition-fast: 150ms ease;
-        --transition-normal: 250ms ease;
-        --transition-slow: 400ms ease;
+        /* Fonts */
+        --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        --font-serif: 'Source Serif 4', Georgia, serif;
+      }
+
+      .dark {
+        --bg-0: #212121;
+        --bg-000: #212121;
+        --bg-100: #262624;
+        --bg-200: #30302E;
+        --bg-300: #454540;
+        --text-100: #ECECEC;
+        --text-200: #E1E1E0;
+        --text-300: #B4B4B4;
+        --text-400: #8A8A88;
+        --text-500: #6B6B65;
+        --accent: #D2996E;
+        --accent-hover: #E5AA7F;
+        --accent-light: rgba(210, 153, 110, 0.15);
       }
 
       * {
@@ -72,9 +84,9 @@
       }
 
       html, body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        background: var(--bg-primary);
-        color: var(--text-primary);
+        font-family: var(--font-sans);
+        background: var(--bg-0);
+        color: var(--text-100);
         width: 100%;
         height: 100%;
         overflow: hidden;
@@ -100,6 +112,12 @@
 
       .g-icon.filled {
         font-variation-settings: 'FILL' 1;
+      }
+
+      /* Prevent text selection during resize */
+      .resizing * {
+        user-select: none !important;
+        cursor: col-resize !important;
       }
     </style>
   </head>

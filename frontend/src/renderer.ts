@@ -16,6 +16,60 @@ export interface Surface {
 // Fallback placeholder image
 const FALLBACK_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"%3E%3Crect fill="%23f0f0f0" width="400" height="300"/%3E%3Ctext fill="%23999" font-family="sans-serif" font-size="14" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EImage%3C/text%3E%3C/svg%3E';
 
+// Map A2UI icon names (camelCase) to Material Symbols (snake_case)
+const ICON_MAP: Record<string, string> = {
+  accountCircle: 'account_circle',
+  add: 'add',
+  arrowBack: 'arrow_back',
+  arrowForward: 'arrow_forward',
+  arrowDropDown: 'arrow_drop_down',
+  attachFile: 'attach_file',
+  calendarToday: 'calendar_today',
+  call: 'call',
+  camera: 'camera',
+  check: 'check',
+  checkCircle: 'check_circle',
+  close: 'close',
+  delete: 'delete',
+  download: 'download',
+  edit: 'edit',
+  error: 'error',
+  event: 'event',
+  favorite: 'favorite',
+  favoriteOff: 'favorite_border',
+  folder: 'folder',
+  help: 'help',
+  home: 'home',
+  info: 'info',
+  locationOn: 'location_on',
+  lock: 'lock',
+  lockOpen: 'lock_open',
+  mail: 'mail',
+  menu: 'menu',
+  moreVert: 'more_vert',
+  moreHoriz: 'more_horiz',
+  notifications: 'notifications',
+  notificationsOff: 'notifications_off',
+  payment: 'payment',
+  person: 'person',
+  phone: 'phone',
+  photo: 'photo',
+  print: 'print',
+  refresh: 'refresh',
+  search: 'search',
+  send: 'send',
+  settings: 'settings',
+  share: 'share',
+  shoppingCart: 'shopping_cart',
+  star: 'star',
+  starHalf: 'star_half',
+  starOff: 'star_border',
+  upload: 'upload',
+  visibility: 'visibility',
+  visibilityOff: 'visibility_off',
+  warning: 'warning',
+};
+
 export class A2UIRenderer {
   private surfaces: Map<string, Surface> = new Map();
 
@@ -227,13 +281,11 @@ export class A2UIRenderer {
 
   private renderIcon(component: Component, dataModel: Record<string, unknown>): TemplateResult {
     const nameValue = this.resolveValue(component.name, dataModel);
-    const iconName = this.camelToSnake(String(nameValue ?? 'help'));
+    const iconKey = String(nameValue ?? 'help');
+    // Use the icon map, fallback to converting camelCase to snake_case
+    const iconName = ICON_MAP[iconKey] || iconKey.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
     
     return html`<span class="g-icon a2ui-icon">${iconName}</span>`;
-  }
-
-  private camelToSnake(str: string): string {
-    return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
   }
 
   private renderRow(component: Component, surface: Surface, dataContextPath: string): TemplateResult {

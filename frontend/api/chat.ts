@@ -201,37 +201,94 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const text = response.text ?? '';
     
-    // Clean up the response - remove markdown code blocks if present
-    let cleanedText = text.trim();
-    
-    // Remove various markdown formats
-    if (cleanedText.startsWith('```json')) {
-      cleanedText = cleanedText.slice(7);
-    } else if (cleanedText.startsWith('```')) {
-      cleanedText = cleanedText.slice(3);
-    }
-    if (cleanedText.endsWith('```')) {
-      cleanedText = cleanedText.slice(0, -3);
-    }
-    cleanedText = cleanedText.trim();
+    // Robust JSON extraction
+    const extractJSON = (input: string): string | null => {
+      let cleaned = input.trim();
+      
+      // Remove markdown code blocks
+      cleaned = cleaned.replace(/^```(?:json)?\s*/i, '');
+      cleaned = cleaned.replace(/\s*```$/i, '');
+      cleaned = cleaned.trim();
+      
+      // Find the outermost JSON array with bracket matching
+      const start = cleaned.indexOf('[');
+      if (start === -1) return null;
+      
+      let depth = 0;
+      let end = -1;
+      let inString = false;
+      let escape = false;
+      
+      for (let i = start; i < cleaned.length; i++) {
+        const char = cleaned[i];
+        
+        if (escape) {
+          escape = false;
+          continue;
+        }
+        
+        if (char === '\\' && inString) {
+          escape = true;
+          continue;
+        }
+        
+        if (char === '"' && !escape) {
+          inString = !inString;
+          continue;
+        }
+        
+        if (!inString) {
+          if (char === '[') depth++;
+          else if (char === ']') {
+            depth--;
+            if (depth === 0) {
+              end = i;
+              break;
+            }
+          }
+        }
+      }
+      
+      if (end !== -1) {
+        return cleaned.slice(start, end + 1);
+      }
+      
+      return null;
+    };
 
-    // Try to find JSON array in the response
-    const jsonStart = cleanedText.indexOf('[');
-    const jsonEnd = cleanedText.lastIndexOf(']');
+    const jsonString = extractJSON(text);
     
-    if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
-      cleanedText = cleanedText.slice(jsonStart, jsonEnd + 1);
+    if (!jsonString) {
+      console.error('No JSON array found in response:', text.substring(0, 500));
+      const fallbackMessages = [
+        { createSurface: { surfaceId: "main", catalogId: "a2ui.dev:standard:0.8" } },
+        { updateComponents: { surfaceId: "main", components: [
+          { id: "root", type: "Card", child: "content" },
+          { id: "content", type: "Column", children: { explicitList: ["title", "desc"] } },
+          { id: "title", type: "Text", text: { literalString: "Parsing Issue" }, usageHint: "h3" },
+          { id: "desc", type: "Text", text: { literalString: "Could not extract UI data. Please try again with a different request." }, usageHint: "body" }
+        ] } }
+      ];
+      return res.status(200).json({ messages: fallbackMessages });
     }
 
     // Parse and validate the JSON
     try {
-      const messages = JSON.parse(cleanedText);
+      const messages = JSON.parse(jsonString);
       if (!Array.isArray(messages)) {
         throw new Error('Response is not an array');
       }
+      
+      // Validate basic structure
+      const hasCreateSurface = messages.some((m: Record<string, unknown>) => m.createSurface);
+      if (!hasCreateSurface && messages.length > 0) {
+        // Add createSurface if missing
+        messages.unshift({ createSurface: { surfaceId: "main", catalogId: "a2ui.dev:standard:0.8" } });
+      }
+      
       return res.status(200).json({ messages });
     } catch (parseError) {
-      console.error('Failed to parse A2UI response:', cleanedText.substring(0, 500));
+      console.error('JSON parse error:', parseError, 'Input:', jsonString.substring(0, 300));
       
       // Return a fallback error UI
       const fallbackMessages = [
@@ -240,7 +297,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           { id: "root", type: "Card", child: "content" },
           { id: "content", type: "Column", children: { explicitList: ["title", "desc"] } },
           { id: "title", type: "Text", text: { literalString: "Generation Error" }, usageHint: "h3" },
-          { id: "desc", type: "Text", text: { literalString: "The AI response could not be parsed. Please try a different request." }, usageHint: "body" }
+          { id: "desc", type: "Text", text: { literalString: "The AI response was malformed. Please try a simpler request." }, usageHint: "body" }
         ] } }
       ];
       
