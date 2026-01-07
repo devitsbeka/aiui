@@ -50,3 +50,6 @@ export { calculateScore, quickScore, type ScoreBreakdown } from './scoring.js';
 // Pipeline
 export { GeneratorPipeline, createPipeline } from './pipeline.js';
 
+// Tests
+export { GOLDEN_TESTS, runGoldenTest, runAllGoldenTests } from './tests/golden-tests.js';
+
