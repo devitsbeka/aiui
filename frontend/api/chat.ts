@@ -136,30 +136,22 @@ Example response for a restaurant card:
 ]
 `;
 
-const SYSTEM_PROMPT = `You are an expert UI designer that creates beautiful, functional interfaces using the A2UI protocol.
-
-When the user describes what they want, respond ONLY with a valid A2UI JSON array. No explanations, no markdown.
+const SYSTEM_PROMPT = `You are a JSON-only API that generates A2UI interfaces. You MUST respond with ONLY a valid JSON array. No text, no explanations, no markdown - JUST the JSON array starting with [ and ending with ].
 
 ${A2UI_PROTOCOL_SCHEMA}
 
-Available Component Catalog:
-${JSON.stringify(STANDARD_CATALOG.components, null, 2)}
+Available components: Text, Image, Icon, Row, Column, Card, Button, TextField, Divider, List
 
-Design Principles:
-1. Create visually appealing layouts with proper hierarchy
-2. Use Cards to group related content
-3. Use proper text hierarchy (h1 for main titles, h3 for card titles, body for descriptions, caption for metadata)
-4. Always include relevant images using Picsum Photos format
-5. Add interactive elements like buttons where appropriate
-6. Keep designs clean and modern
+CRITICAL RULES:
+1. Output MUST start with [ and end with ]
+2. NO text before or after the JSON
+3. NO markdown code blocks
+4. First element: { "createSurface": { "surfaceId": "main", "catalogId": "a2ui.dev:standard:0.8" } }
+5. One component MUST have "id": "root"
+6. Images: https://picsum.photos/seed/{word}/{width}/{height}
 
-Rules:
-1. Respond ONLY with a valid JSON array - no text before or after
-2. First message must be createSurface with surfaceId "main"
-3. One component MUST have id "root"
-4. Use Picsum Photos for ALL images: https://picsum.photos/seed/{word}/{width}/{height}
-5. NO markdown code blocks - just raw JSON array
-6. Create complete, polished UIs - not minimal examples`;
+Example output format:
+[{"createSurface":{"surfaceId":"main","catalogId":"a2ui.dev:standard:0.8"}},{"updateComponents":{"surfaceId":"main","components":[{"id":"root","type":"Card","child":"content"}]}}]`;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Enable CORS
@@ -192,23 +184,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: [
-        { role: 'user', parts: [{ text: message }] }
+        { role: 'user', parts: [{ text: `Create a UI for: ${message}` }] }
       ],
       config: {
         systemInstruction: SYSTEM_PROMPT,
+        temperature: 0.7,
+        responseMimeType: 'application/json',
       }
     });
 
     const text = response.text ?? '';
+    console.log('Raw Gemini response (first 500 chars):', text.substring(0, 500));
     
-    // Robust JSON extraction
+    // Robust JSON extraction with multiple strategies
     const extractJSON = (input: string): string | null => {
       let cleaned = input.trim();
       
-      // Remove markdown code blocks
-      cleaned = cleaned.replace(/^```(?:json)?\s*/i, '');
-      cleaned = cleaned.replace(/\s*```$/i, '');
+      // Strategy 1: Remove markdown code blocks
+      cleaned = cleaned.replace(/```json\s*/gi, '');
+      cleaned = cleaned.replace(/```\s*/gi, '');
       cleaned = cleaned.trim();
+      
+      // Strategy 2: Remove common AI preambles before the JSON
+      const preamblePatterns = [
+        /^(okay|ok|sure|here['']?s?|alright|certainly)[,.:!\s]*/i,
+        /^(here is|here's|this is)[^[{]*/i,
+        /^[^[{]*?(?=\[)/s, // Everything before first [
+      ];
+      
+      for (const pattern of preamblePatterns) {
+        if (cleaned.match(pattern)) {
+          const match = cleaned.match(/\[[\s\S]*\]/);
+          if (match) {
+            cleaned = match[0];
+            break;
+          }
+        }
+      }
       
       // Find the outermost JSON array with bracket matching
       const start = cleaned.indexOf('[');
