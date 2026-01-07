@@ -100,47 +100,66 @@ A2UI Protocol Message Types:
 3. updateDataModel - Updates data that components can bind to:
    { "updateDataModel": { "surfaceId": "string", "path": "/", "value": { ...data } } }
 
+CRITICAL IMAGE URL RULES:
+- For images, ALWAYS use Picsum Photos with this exact format: https://picsum.photos/seed/{descriptive-word}/{width}/{height}
+- Examples:
+  - Restaurant: https://picsum.photos/seed/sushi/400/250
+  - Person/Avatar: https://picsum.photos/seed/portrait/100/100
+  - Product: https://picsum.photos/seed/shoes/300/300
+  - Nature: https://picsum.photos/seed/forest/400/300
+  - Food: https://picsum.photos/seed/pasta/400/250
+- Use descriptive seed words that match the content context
+- Common sizes: 400x250 for features, 100x100 for avatars, 300x200 for cards
+
 Example response for a restaurant card:
 [
   { "createSurface": { "surfaceId": "main", "catalogId": "a2ui.dev:standard:0.8" } },
   { "updateDataModel": { "surfaceId": "main", "value": { 
-    "restaurants": [
-      { "name": "Sushi Palace", "rating": 4.5, "cuisine": "Japanese", "image": "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=400" }
-    ]
+    "restaurant": {
+      "name": "Sakura Sushi",
+      "rating": "4.8",
+      "cuisine": "Japanese",
+      "price": "$$$",
+      "image": "https://picsum.photos/seed/sushi/400/250"
+    }
   } } },
   { "updateComponents": { "surfaceId": "main", "components": [
-    { "id": "root", "type": "Column", "children": { "explicitList": ["card1"] } },
-    { "id": "card1", "type": "Card", "child": "cardContent" },
-    { "id": "cardContent", "type": "Column", "children": { "explicitList": ["img1", "title1", "rating1"] } },
-    { "id": "img1", "type": "Image", "url": { "path": "/restaurants/0/image" }, "usageHint": "mediumFeature" },
-    { "id": "title1", "type": "Text", "text": { "path": "/restaurants/0/name" }, "usageHint": "h3" },
-    { "id": "rating1", "type": "Text", "text": { "literalString": "★ 4.5" }, "usageHint": "caption" }
+    { "id": "root", "type": "Card", "child": "content" },
+    { "id": "content", "type": "Column", "children": { "explicitList": ["img", "info"] }, "alignment": "stretch" },
+    { "id": "img", "type": "Image", "url": { "path": "/restaurant/image" }, "usageHint": "mediumFeature", "fit": "cover" },
+    { "id": "info", "type": "Column", "children": { "explicitList": ["name", "meta", "btn"] } },
+    { "id": "name", "type": "Text", "text": { "path": "/restaurant/name" }, "usageHint": "h3" },
+    { "id": "meta", "type": "Text", "text": { "literalString": "Japanese · $$$ · ★ 4.8" }, "usageHint": "caption" },
+    { "id": "btn", "type": "Button", "child": "btnText", "primary": true, "action": { "name": "reserve" } },
+    { "id": "btnText", "type": "Text", "text": { "literalString": "Reserve a Table" } }
   ] } }
 ]
 `;
 
-const SYSTEM_PROMPT = `You are an AI assistant that generates rich user interfaces using the A2UI protocol.
+const SYSTEM_PROMPT = `You are an expert UI designer that creates beautiful, functional interfaces using the A2UI protocol.
 
-When the user asks for something, you MUST respond with a valid A2UI JSON array that creates a beautiful, functional UI.
+When the user describes what they want, respond ONLY with a valid A2UI JSON array. No explanations, no markdown.
 
 ${A2UI_PROTOCOL_SCHEMA}
 
 Available Component Catalog:
 ${JSON.stringify(STANDARD_CATALOG.components, null, 2)}
 
-Rules:
-1. ALWAYS respond with a valid JSON array of A2UI messages
-2. The first message should be createSurface with surfaceId "main" and catalogId "a2ui.dev:standard:0.8"
-3. Use updateDataModel to provide any dynamic data
-4. Use updateComponents to define the UI structure - one component MUST have id "root"
-5. Use real, working image URLs from Unsplash (https://images.unsplash.com/...) or Picsum (https://picsum.photos/...)
-6. Make the UI visually appealing with proper hierarchy and spacing
-7. Use appropriate usageHints for Text (h1-h5, body, caption) and Image (icon, avatar, smallFeature, mediumFeature, largeFeature, header)
-8. For lists of items, use the template pattern with dataBinding
-9. DO NOT include any text before or after the JSON array - ONLY the JSON array
-10. DO NOT wrap the response in markdown code blocks - just raw JSON
+Design Principles:
+1. Create visually appealing layouts with proper hierarchy
+2. Use Cards to group related content
+3. Use proper text hierarchy (h1 for main titles, h3 for card titles, body for descriptions, caption for metadata)
+4. Always include relevant images using Picsum Photos format
+5. Add interactive elements like buttons where appropriate
+6. Keep designs clean and modern
 
-Remember: Output ONLY the JSON array, nothing else!`;
+Rules:
+1. Respond ONLY with a valid JSON array - no text before or after
+2. First message must be createSurface with surfaceId "main"
+3. One component MUST have id "root"
+4. Use Picsum Photos for ALL images: https://picsum.photos/seed/{word}/{width}/{height}
+5. NO markdown code blocks - just raw JSON array
+6. Create complete, polished UIs - not minimal examples`;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Enable CORS
@@ -184,6 +203,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     
     // Clean up the response - remove markdown code blocks if present
     let cleanedText = text.trim();
+    
+    // Remove various markdown formats
     if (cleanedText.startsWith('```json')) {
       cleanedText = cleanedText.slice(7);
     } else if (cleanedText.startsWith('```')) {
@@ -194,6 +215,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
     cleanedText = cleanedText.trim();
 
+    // Try to find JSON array in the response
+    const jsonStart = cleanedText.indexOf('[');
+    const jsonEnd = cleanedText.lastIndexOf(']');
+    
+    if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+      cleanedText = cleanedText.slice(jsonStart, jsonEnd + 1);
+    }
+
     // Parse and validate the JSON
     try {
       const messages = JSON.parse(cleanedText);
@@ -202,11 +231,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
       return res.status(200).json({ messages });
     } catch (parseError) {
-      console.error('Failed to parse A2UI response:', cleanedText);
-      return res.status(500).json({ 
-        error: 'Failed to parse AI response',
-        raw: cleanedText 
-      });
+      console.error('Failed to parse A2UI response:', cleanedText.substring(0, 500));
+      
+      // Return a fallback error UI
+      const fallbackMessages = [
+        { createSurface: { surfaceId: "main", catalogId: "a2ui.dev:standard:0.8" } },
+        { updateComponents: { surfaceId: "main", components: [
+          { id: "root", type: "Card", child: "content" },
+          { id: "content", type: "Column", children: { explicitList: ["title", "desc"] } },
+          { id: "title", type: "Text", text: { literalString: "Generation Error" }, usageHint: "h3" },
+          { id: "desc", type: "Text", text: { literalString: "The AI response could not be parsed. Please try a different request." }, usageHint: "body" }
+        ] } }
+      ];
+      
+      return res.status(200).json({ messages: fallbackMessages });
     }
 
   } catch (error) {
@@ -217,4 +255,3 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
 }
-

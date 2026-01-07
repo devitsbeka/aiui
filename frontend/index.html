@@ -3,133 +3,90 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>A2UI Chat</title>
+    <title>A2UI Studio</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_circle,add,arrow_back,arrow_drop_down,arrow_forward,attach_file,calendar_today,call,camera,check,check_circle,close,communication,content_copy,dark_mode,delete,download,draw,edit,error,event,favorite,favorite_off,folder,help,home,info,light_mode,location_on,lock,lock_open,mail,menu,mobile_layout,more_horiz,more_vert,notifications,notifications_off,payment,pen_size_1,person,phone,photo,print,progress_activity,rectangle,refresh,search,send,settings,share,shopping_cart,star,star_half,star_off,upload,visibility,visibility_off,warning"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_circle,add,arrow_back,arrow_drop_down,arrow_forward,attach_file,auto_awesome,calendar_today,call,camera,check,check_circle,close,communication,content_copy,contrast,dark_mode,delete,download,draw,edit,error,event,favorite,favorite_off,folder,help,home,info,light_mode,location_on,lock,lock_open,mail,menu,mobile_layout,more_horiz,more_vert,notifications,notifications_off,payment,pen_size_1,person,phone,photo,print,progress_activity,rectangle,refresh,search,send,settings,share,shopping_cart,star,star_half,star_off,upload,visibility,visibility_off,warning"
     />
 
     <style>
       :root {
-        --n-100: #ffffff;
-        --n-99: #fcfcfc;
-        --n-98: #f9f9f9;
-        --n-95: #f1f1f1;
-        --n-90: #e2e2e2;
-        --n-80: #c6c6c6;
-        --n-70: #ababab;
-        --n-60: #919191;
-        --n-50: #777777;
-        --n-40: #5e5e5e;
-        --n-35: #525252;
-        --n-30: #474747;
-        --n-25: #3b3b3b;
-        --n-20: #303030;
-        --n-15: #262626;
-        --n-10: #1b1b1b;
-        --n-5: #111111;
-        --n-0: #000000;
-
-        --p-100: #ffffff;
-        --p-99: #fffbff;
-        --p-98: #fcf8ff;
-        --p-95: #f2efff;
-        --p-90: #e1e0ff;
-        --p-80: #c0c1ff;
-        --p-70: #a0a3ff;
-        --p-60: #8487ea;
-        --p-50: #6a6dcd;
-        --p-40: #5154b3;
-        --p-35: #4447a6;
-        --p-30: #383b99;
-        --p-25: #2c2e8d;
-        --p-20: #202182;
-        --p-15: #131178;
-        --p-10: #06006c;
-        --p-5: #03004d;
-        --p-0: #000000;
-
-        --e-100: #ffffff;
-        --e-40: #ba1a1a;
-        --e-95: #ffedea;
-        --e-80: #ffb4ab;
-
-        --bb-grid-size: 4px;
-        --bb-grid-size-2: calc(var(--bb-grid-size) * 2);
-        --bb-grid-size-3: calc(var(--bb-grid-size) * 3);
-        --bb-grid-size-4: calc(var(--bb-grid-size) * 4);
-        --bb-grid-size-5: calc(var(--bb-grid-size) * 5);
-        --bb-grid-size-6: calc(var(--bb-grid-size) * 6);
-        --bb-grid-size-8: calc(var(--bb-grid-size) * 8);
+        /* Claude-inspired warm palette */
+        --bg-primary: #FAF9F7;
+        --bg-secondary: #F5F3F0;
+        --surface: #FFFFFF;
+        --surface-elevated: #FFFFFF;
+        --text-primary: #1A1A1A;
+        --text-secondary: #666666;
+        --text-tertiary: #999999;
+        --accent: #E07A5F;
+        --accent-light: #F4D3CB;
+        --border: #E8E5E0;
+        --border-light: #F0EDE8;
+        
+        /* Preview gradient colors */
+        --gradient-1: #a855f7;
+        --gradient-2: #6366f1;
+        --gradient-3: #3b82f6;
+        --gradient-4: #14b8a6;
+        
+        /* Spacing */
+        --space-1: 4px;
+        --space-2: 8px;
+        --space-3: 12px;
+        --space-4: 16px;
+        --space-5: 20px;
+        --space-6: 24px;
+        --space-8: 32px;
+        --space-10: 40px;
+        --space-12: 48px;
+        
+        /* Radius */
+        --radius-sm: 6px;
+        --radius-md: 10px;
+        --radius-lg: 16px;
+        --radius-xl: 24px;
+        
+        /* Shadows */
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+        
+        /* Transitions */
+        --transition-fast: 150ms ease;
+        --transition-normal: 250ms ease;
+        --transition-slow: 400ms ease;
       }
 
       * {
         box-sizing: border-box;
-      }
-
-      html,
-      body {
-        --font-family: "Outfit", "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-family: var(--font-family);
         margin: 0;
         padding: 0;
+      }
+
+      html, body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
         width: 100%;
-        min-height: 100vh;
-        overflow-x: hidden;
-
-        --color-scheme: light;
-        color-scheme: var(--color-scheme);
-
-        background: 
-          radial-gradient(at 0% 0%, rgba(161, 196, 253, 0.4) 0px, transparent 50%),
-          radial-gradient(at 100% 0%, rgba(194, 163, 255, 0.35) 0px, transparent 50%),
-          radial-gradient(at 100% 100%, rgba(162, 210, 255, 0.35) 0px, transparent 50%),
-          radial-gradient(at 0% 100%, rgba(199, 175, 255, 0.35) 0px, transparent 50%),
-          linear-gradient(135deg, #f8faff 0%, #f0f4ff 50%, #faf8ff 100%);
-        background-attachment: fixed;
-      }
-
-      html.light,
-      body.light {
-        --color-scheme: light;
-      }
-
-      html.dark,
-      body.dark {
-        --color-scheme: dark;
-        background: 
-          radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
-          radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.12) 0px, transparent 50%),
-          radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.12) 0px, transparent 50%),
-          radial-gradient(at 0% 100%, rgba(168, 85, 247, 0.12) 0px, transparent 50%),
-          linear-gradient(135deg, #0c0a1d 0%, #1a1333 50%, #0f0d1f 100%);
-      }
-
-      @media (prefers-color-scheme: dark) {
-        html:not(.light),
-        body:not(.light) {
-          --color-scheme: dark;
-          background: 
-            radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
-            radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.12) 0px, transparent 50%),
-            radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.12) 0px, transparent 50%),
-            radial-gradient(at 0% 100%, rgba(168, 85, 247, 0.12) 0px, transparent 50%),
-            linear-gradient(135deg, #0c0a1d 0%, #1a1333 50%, #0f0d1f 100%);
-        }
+        height: 100%;
+        overflow: hidden;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
       }
 
       .g-icon {
         font-family: 'Material Symbols Outlined';
         font-weight: normal;
         font-style: normal;
-        font-size: 24px;
+        font-size: 20px;
         line-height: 1;
         letter-spacing: normal;
         text-transform: none;
@@ -141,14 +98,13 @@
         -webkit-font-smoothing: antialiased;
       }
 
-      .g-icon.filled-heavy {
-        font-variation-settings: 'FILL' 1, 'wght' 500;
+      .g-icon.filled {
+        font-variation-settings: 'FILL' 1;
       }
     </style>
   </head>
   <body>
-    <a2ui-chat></a2ui-chat>
+    <a2ui-studio></a2ui-studio>
     <script type="module" src="/src/app.ts"></script>
   </body>
 </html>
-

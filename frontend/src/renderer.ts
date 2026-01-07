@@ -13,10 +13,16 @@ export interface Surface {
   dataModel: Record<string, unknown>;
 }
 
+// Fallback placeholder image
+const FALLBACK_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"%3E%3Crect fill="%23f0f0f0" width="400" height="300"/%3E%3Ctext fill="%23999" font-family="sans-serif" font-size="14" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EImage%3C/text%3E%3C/svg%3E';
+
 export class A2UIRenderer {
   private surfaces: Map<string, Surface> = new Map();
 
   processMessages(messages: A2UIMessage[]): void {
+    // Clear existing surfaces for fresh render
+    this.surfaces.clear();
+    
     for (const message of messages) {
       if (message.createSurface) {
         this.surfaces.set(message.createSurface.surfaceId, {
@@ -192,7 +198,13 @@ export class A2UIRenderer {
       }
     }
     
-    const url = String(urlValue ?? '');
+    let url = String(urlValue ?? '');
+    
+    // Validate URL - use fallback for empty or invalid URLs
+    if (!url || url === 'undefined' || url === 'null') {
+      url = FALLBACK_IMAGE;
+    }
+    
     const usageHint = component.usageHint as string || 'mediumFeature';
     const fit = component.fit as string || 'cover';
     
@@ -203,6 +215,12 @@ export class A2UIRenderer {
         alt=""
         style="object-fit: ${fit}"
         loading="lazy"
+        @error=${(e: Event) => {
+          const img = e.target as HTMLImageElement;
+          if (img.src !== FALLBACK_IMAGE) {
+            img.src = FALLBACK_IMAGE;
+          }
+        }}
       />
     `;
   }
@@ -372,7 +390,7 @@ export class A2UIRenderer {
     const max = component.maxValue as number ?? 100;
     
     return html`
-      <input type="range" class="a2ui-slider" .value="${value}" min="${min}" max="${max}" />
+      <input type="range" class="a2ui-slider" .value="${String(value)}" min="${min}" max="${max}" />
     `;
   }
 
@@ -388,4 +406,3 @@ export class A2UIRenderer {
     `;
   }
 }
-
